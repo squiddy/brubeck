@@ -1,7 +1,7 @@
 #include "sput.h"
 #include "brubeck.h"
 
-static struct brubeck_metric *new_metric(const char *name)
+static struct brubeck_metric *new_metric_helper(const char *name)
 {
 	size_t name_len = strlen(name);
 	struct brubeck_metric *metric = malloc(sizeof(struct brubeck_metric) + name_len + 1);
@@ -26,7 +26,7 @@ void test_mstore__save(void)
 		struct brubeck_metric *metric;
 
 		sprintf(buffer, "github.test.metric.%d", i);
-		metric = new_metric(buffer);
+		metric = new_metric_helper(buffer);
 
 		if (!brubeck_hashtable_insert(store, metric->key, metric->key_len, metric))
 			break;
