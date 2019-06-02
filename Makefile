@@ -1,6 +1,6 @@
 GIT_SHA = $(shell git rev-parse --short HEAD)
 TARGET = brubeck
-LIBS = -lm -pthread -lrt -lcrypto -ljansson
+LIBS = -lm -pthread -lrt -ljansson
 CC = gcc
 CXX = g++
 CFLAGS = -g -Wall -O3 -Wno-strict-aliasing -Isrc -Ivendor/ck/include -DNDEBUG=1 -DGIT_SHA=\"$(GIT_SHA)\"
@@ -22,7 +22,6 @@ SOURCES = \
 	src/log.c \
 	src/metric.c \
 	src/sampler.c \
-	src/samplers/statsd-secure.c \
 	src/samplers/statsd.c \
 	src/server.c \
 	src/setproctitle.c \
@@ -32,6 +31,11 @@ SOURCES = \
 ifndef BRUBECK_NO_HTTP
 	LIBS += -lmicrohttpd
 	CFLAGS += -DBRUBECK_HAVE_MICROHTTPD
+endif
+
+ifdef BRUBECK_SECURE
+	LIBS += -lcrypto
+	SOURCES += src/samplers/statsd-secure.c
 endif
 
 OBJECTS = $(patsubst %.c, %.o, $(SOURCES))
