@@ -43,4 +43,10 @@ void test_new_metric(void)
 
 	metric = new_metric(server, "this.is.a.test", 14, BRUBECK_MT_TIMER);
 	sput_fail_unless(strcmp(metric->key, "this.is.a.test.timer") == 0, metric->key);
+
+	metric = new_metric(server, "this.is.a.test", 14, BRUBECK_MT_INTERNAL_STATS);
+	sput_fail_unless(strcmp(metric->key, "this.is.a.test") == 0, metric->key);
+
+	metric = new_metric(server, "this.is.a.test", 14, 555);
+	sput_fail_unless(strcmp(metric->key, "this.is.a.test.unknown") == 0, metric->key);
 }

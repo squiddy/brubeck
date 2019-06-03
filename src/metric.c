@@ -13,6 +13,8 @@ get_metric_suffix(uint8_t type)
 		return ".counter";
 	case BRUBECK_MT_HISTO:
 		return ".histo";
+	case BRUBECK_MT_INTERNAL_STATS:
+		return "";
 
 	default:
 		return ".unknown";
