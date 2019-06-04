@@ -15,7 +15,6 @@ get_metric_suffix(uint8_t type)
 		return ".histo";
 	case BRUBECK_MT_INTERNAL_STATS:
 		return "";
-
 	default:
 		return ".unknown";
 	}
@@ -345,7 +344,19 @@ brubeck_metric_find(struct brubeck_server *server, const char *key, size_t key_l
 	struct brubeck_metric *metric;
 
 	assert(key[key_len] == '\0');
-	metric = brubeck_hashtable_find(server->metrics, key, (uint16_t)key_len);
+	const char *suffix = get_metric_suffix(type);
+	size_t suffix_len = strlen(suffix);
+
+	char *key_with_suffix = (char*) malloc(sizeof(char) * (key_len + suffix_len + 1));
+	if (key_with_suffix == NULL) {
+		return NULL;
+	}
+	strcpy(key_with_suffix, key);
+	strcat(key_with_suffix, suffix);
+
+	uint16_t len_with_suffix = (uint16_t)(key_len + suffix_len);
+	metric = brubeck_hashtable_find(server->metrics, key_with_suffix, len_with_suffix);
+	free(key_with_suffix);
 
 	if (unlikely(metric == NULL)) {
 		if (server->at_capacity)
