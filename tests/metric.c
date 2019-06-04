@@ -31,7 +31,7 @@ void test_new_metric(void)
 {
 	struct brubeck_server *server = new_server();
 	struct brubeck_metric *metric = NULL;
-	
+
 	metric = new_metric(server, "this.is.a.test", 14, BRUBECK_MT_COUNTER);
 	sput_fail_unless(strcmp(metric->key, "this.is.a.test.counter") == 0, metric->key);
 
@@ -47,6 +47,6 @@ void test_new_metric(void)
 	metric = new_metric(server, "this.is.a.test", 14, BRUBECK_MT_INTERNAL_STATS);
 	sput_fail_unless(strcmp(metric->key, "this.is.a.test") == 0, metric->key);
 
-	metric = new_metric(server, "this.is.a.test", 14, 555);
+	metric = new_metric(server, "this.is.a.test", 14, (uint8_t) 555);
 	sput_fail_unless(strcmp(metric->key, "this.is.a.test.unknown") == 0, metric->key);
 }
