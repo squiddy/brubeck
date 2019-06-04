@@ -28,11 +28,13 @@ static void *backend__thread(void *_ptr)
 
 			clock_gettime(CLOCK_REALTIME, &now);
 			self->tick_time = now.tv_sec;
-
+			int count[3] = {0,0,0};
 			for (mt = self->queue; mt; mt = mt->next) {
+				count[mt->expire]++;
 				if (mt->expire > BRUBECK_EXPIRE_DISABLED)
 					brubeck_metric_sample(mt, self->sample, self);
 			}
+			log_splunk("DISABLED: %d, INACTIVE: %d, ACTIVE: %d", count[0], count[1], count[2]);
 
 			if (self->flush)
 				self->flush(self);
