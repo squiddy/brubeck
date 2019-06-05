@@ -21,24 +21,20 @@ get_metric_suffix(uint8_t type)
 	}
 }
 
-inline struct brubeck_metric *
+static inline struct brubeck_metric *
 new_metric(struct brubeck_server *server, const char *key, size_t key_len, uint8_t type)
 {
 	struct brubeck_metric *metric;
 
-	const char *suffix = get_metric_suffix(type);
-	size_t suffix_len = strlen(suffix);
-
 	/* slab allocation cannot fail */
 	metric = brubeck_slab_alloc(&server->slab,
-		sizeof(struct brubeck_metric) + key_len + suffix_len + 1);
+		sizeof(struct brubeck_metric) + key_len + 1);
 
 	memset(metric, 0x0, sizeof(struct brubeck_metric));
 
 	memcpy(metric->key, key, key_len);
 	metric->key[key_len] = '\0';
-	strcat(metric->key, suffix);
-	metric->key_len = (uint16_t)(key_len + suffix_len);
+	metric->key_len = (uint16_t)key_len;
 
 	metric->expire = BRUBECK_EXPIRE_ACTIVE;
 	metric->type = type;

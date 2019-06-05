@@ -16,7 +16,6 @@ void test_ftoa(void);
 void test_statsd_msg__parse_strings(void);
 
 void test_get_metric_suffix(void);
-void test_new_metric(void);
 
 int main(int argc, char *argv[])
 {
@@ -44,7 +43,6 @@ int main(int argc, char *argv[])
 
 	sput_enter_suite("metric: creating / sampling metrics");
 	sput_run_test(test_get_metric_suffix);
-	sput_run_test(test_new_metric);
 
 	sput_finish_testing();
 	return sput_get_return_value();
