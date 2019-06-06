@@ -44,3 +44,33 @@ void test_brubeck_metric_find(void)
 	struct brubeck_metric *metric3 = brubeck_metric_find(server, "this.is.not.a.test", 18, BRUBECK_MT_COUNTER);
 	sput_fail_if(metric2 == metric3, "metrics dont't match");
 }
+
+void test_brubeck_metric_find_adds_key_suffix(void)
+{
+	struct brubeck_server *server = new_server();
+	struct brubeck_metric *metric = NULL;
+
+	metric = brubeck_metric_find(server, "this.is.a.test", 14, BRUBECK_MT_COUNTER);
+	sput_fail_unless(strcmp(metric->key, "this.is.a.test.counter") == 0, "COUNTER has .counter suffix");
+	sput_fail_unless(metric->key_len == 22, "key len matches");
+
+	metric = brubeck_metric_find(server, "this.is.a.test", 14, BRUBECK_MT_METER);
+	sput_fail_unless(strcmp(metric->key, "this.is.a.test.counter") == 0, "METER has .counter suffix");
+	sput_fail_unless(metric->key_len == 22, "key len matches");
+
+	metric = brubeck_metric_find(server, "this.is.a.test", 14, BRUBECK_MT_GAUGE);
+	sput_fail_unless(strcmp(metric->key, "this.is.a.test.gauge") == 0, "GAUGE has .gauge suffix");
+	sput_fail_unless(metric->key_len == 20, "key len matches");
+
+	metric = brubeck_metric_find(server, "this.is.a.test", 14, BRUBECK_MT_TIMER);
+	sput_fail_unless(strcmp(metric->key, "this.is.a.test.timer") == 0, "TIMER has .timer suffix");
+	sput_fail_unless(metric->key_len == 20, "key len matches");
+
+	metric = brubeck_metric_find(server, "this.is.a.test", 14, BRUBECK_MT_HISTO);
+	sput_fail_unless(strcmp(metric->key, "this.is.a.test.histo") == 0, "HISTO has .histo suffix");
+	sput_fail_unless(metric->key_len == 20, "key len matches");
+
+	metric = brubeck_metric_find(server, "this.is.a.test", 14, BRUBECK_MT_INTERNAL_STATS);
+	sput_fail_unless(strcmp(metric->key, "this.is.a.test") == 0, "INTERNAL_STATS has no suffix");
+	sput_fail_unless(metric->key_len == 14, "key len matches");
+}
