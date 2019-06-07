@@ -21,24 +21,20 @@ get_metric_suffix(uint8_t type)
 	}
 }
 
-inline struct brubeck_metric *
+static inline struct brubeck_metric *
 new_metric(struct brubeck_server *server, const char *key, size_t key_len, uint8_t type)
 {
 	struct brubeck_metric *metric;
 
-	const char *suffix = get_metric_suffix(type);
-	size_t suffix_len = strlen(suffix);
-
 	/* slab allocation cannot fail */
 	metric = brubeck_slab_alloc(&server->slab,
-		sizeof(struct brubeck_metric) + key_len + suffix_len + 1);
+		sizeof(struct brubeck_metric) + key_len + 1);
 
 	memset(metric, 0x0, sizeof(struct brubeck_metric));
 
 	memcpy(metric->key, key, key_len);
 	metric->key[key_len] = '\0';
-	strcat(metric->key, suffix);
-	metric->key_len = (uint16_t)(key_len + suffix_len);
+	metric->key_len = (uint16_t)key_len;
 
 	metric->expire = BRUBECK_EXPIRE_ACTIVE;
 	metric->type = type;
@@ -345,13 +341,24 @@ brubeck_metric_find(struct brubeck_server *server, const char *key, size_t key_l
 	struct brubeck_metric *metric;
 
 	assert(key[key_len] == '\0');
-	metric = brubeck_hashtable_find(server->metrics, key, (uint16_t)key_len);
+
+	/* Add suffix to metric key dependending on the type */
+	const char *suffix = get_metric_suffix(type);
+	size_t suffix_len = strlen(suffix);
+
+	// key_len already includes the 0-byte terminator
+	size_t new_key_len = key_len + suffix_len;
+	char *new_key = alloca(new_key_len);
+	memcpy(new_key, key, key_len);
+	memcpy(new_key + key_len, suffix, suffix_len);
+
+	metric = brubeck_hashtable_find(server->metrics, new_key, (uint16_t)new_key_len);
 
 	if (unlikely(metric == NULL)) {
 		if (server->at_capacity)
 			return NULL;
 
-		return brubeck_metric_new(server, key, key_len, type);
+		return brubeck_metric_new(server, new_key, new_key_len, type);
 	}
 
 #ifdef BRUBECK_METRICS_FLOW
