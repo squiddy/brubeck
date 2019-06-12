@@ -19,6 +19,8 @@ void test_get_metric_suffix(void);
 void test_brubeck_metric_find(void);
 void test_brubeck_metric_find_adds_key_suffix(void);
 
+void test_stats_track_by_namespace(void);
+
 int main(int argc, char *argv[])
 {
 	sput_start_testing();
@@ -42,6 +44,9 @@ int main(int argc, char *argv[])
 
 	sput_enter_suite("statsd: packet parsing");
 	sput_run_test(test_statsd_msg__parse_strings);
+
+	sput_enter_suite("statsd");
+	sput_run_test(test_stats_track_by_namespace);
 
 	sput_enter_suite("metric: creating / sampling metrics");
 	sput_run_test(test_get_metric_suffix);

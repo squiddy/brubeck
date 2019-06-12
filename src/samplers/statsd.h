@@ -30,6 +30,7 @@ struct brubeck_statsd_secure {
 	pthread_t thread;
 };
 
+void stats_track_by_namespace(struct brubeck_server *server, const char *msg_key, size_t msg_key_len);
 void brubeck_statsd_packet_parse(struct brubeck_server *server, char *buffer, char *end);
 int brubeck_statsd_msg_parse(struct brubeck_statsd_msg *msg, char *buffer, char *end);
 
