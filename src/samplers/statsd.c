@@ -240,6 +240,28 @@ int brubeck_statsd_msg_parse(struct brubeck_statsd_msg *msg, char *buffer, char 
 	}
 }
 
+void stats_track_by_namespace(struct brubeck_server *server, const char *msg_key, size_t msg_key_len)
+{
+	char *first_part = memchr(msg_key, '.', msg_key_len);
+	if (first_part == NULL)
+		return;
+
+	const char *prefix = "statsd.team.";
+	size_t prefix_len = strlen(prefix);
+
+	size_t team_len = first_part - msg_key;
+
+	size_t key_len = prefix_len + team_len + 1;
+	char *key = alloca(key_len);
+	memcpy(key, prefix, prefix_len);
+	memcpy(key + prefix_len, msg_key, team_len);
+	key[key_len - 1] = '\0';
+
+	struct brubeck_metric *metric = brubeck_metric_find(server, key, key_len, BRUBECK_MT_METER);
+	if (metric != NULL)
+		brubeck_metric_record(metric, 1, 1, 0);
+}
+
 void brubeck_statsd_packet_parse(struct brubeck_server *server, char *buffer, char *end)
 {
 	struct brubeck_statsd_msg msg;
@@ -258,6 +280,8 @@ void brubeck_statsd_packet_parse(struct brubeck_server *server, char *buffer, ch
 			metric = brubeck_metric_find(server, msg.key, msg.key_len, msg.type);
 			if (metric != NULL)
 				brubeck_metric_record(metric, msg.value, msg.sample_freq, msg.modifiers);
+
+			stats_track_by_namespace(server, msg.key, msg.key_len);
 		}
 
 		/* move buf past this stat */
