@@ -195,7 +195,7 @@ histogram__sample(struct brubeck_metric *metric, brubeck_sample_cb sample, void 
 	/* alloc space for this on the stack. we need enough for:
 	 * key_length + longest_suffix + null terminator
 	 */
-	key = alloca(metric->key_len + strlen(".percentile.999") + 1);
+	key = alloca(metric->key_len + strlen(".upper") + 1);
 	memcpy(key, metric->key, metric->key_len);
 
 
@@ -203,21 +203,16 @@ histogram__sample(struct brubeck_metric *metric, brubeck_sample_cb sample, void 
 		sample(key, hsample.count, opaque);
 	}
 
-	WITH_SUFFIX(".count_ps") {
-		struct brubeck_backend *backend = opaque;
-		sample(key, hsample.count / (double)backend->sample_freq, opaque);
-	}
-
 	/* if there have been no metrics during this sampling period,
 	 * we don't need to report any of the histogram samples */
 	if (hsample.count == 0.0)
 		return;
 
-	WITH_SUFFIX(".min") {
+	WITH_SUFFIX(".lower") {
 		sample(key, hsample.min, opaque);
 	}
 
-	WITH_SUFFIX(".max") {
+	WITH_SUFFIX(".upper") {
 		sample(key, hsample.max, opaque);
 	}
 
@@ -227,30 +222,6 @@ histogram__sample(struct brubeck_metric *metric, brubeck_sample_cb sample, void 
 
 	WITH_SUFFIX(".mean") {
 		sample(key, hsample.mean, opaque);
-	}
-
-	WITH_SUFFIX(".median") {
-		sample(key, hsample.median, opaque);
-	}
-
-	WITH_SUFFIX(".percentile.75") {
-		sample(key, hsample.percentile[PC_75], opaque);
-	}
-
-	WITH_SUFFIX(".percentile.95") {
-		sample(key, hsample.percentile[PC_95], opaque);
-	}
-
-	WITH_SUFFIX(".percentile.98") {
-		sample(key, hsample.percentile[PC_98], opaque);
-	}
-
-	WITH_SUFFIX(".percentile.99") {
-		sample(key, hsample.percentile[PC_99], opaque);
-	}
-
-	WITH_SUFFIX(".percentile.999") {
-		sample(key, hsample.percentile[PC_999], opaque);
 	}
 }
 
